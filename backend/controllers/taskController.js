@@ -1,4 +1,5 @@
 const Task = require('../models/taskModel');
+const { parseUserInput } = require('../services/aiService');
 
 // @desc    Get all tasks
 // @route   GET /api/tasks
@@ -37,7 +38,33 @@ const createTask = async (req, res) => {
   }
 };
 
+// @desc    Parse natural language input into a task
+// @route   POST /api/tasks/parse
+// @access  Public
+const parseTask = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ message: 'Text input is required' });
+    }
+
+    // Call AI Service
+    const structuredData = await parseUserInput(text);
+
+    // Create task from structured data
+    const newTask = new Task(structuredData);
+
+    const savedTask = await newTask.save();
+    res.status(201).json(savedTask);
+  } catch (error) {
+    console.error('ParseTask Controller Error:', error);
+    res.status(500).json({ message: 'Error parsing and saving task' });
+  }
+};
+
 module.exports = {
   getTasks,
   createTask,
+  parseTask,
 };
