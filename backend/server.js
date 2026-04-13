@@ -10,6 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use('/api/tasks', require('./routes/taskRoutes'));
+
 app.get('/', (req, res) => {
   res.json({ message: 'Productivity API is running' });
 });
