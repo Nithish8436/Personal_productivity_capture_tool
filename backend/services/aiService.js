@@ -39,7 +39,7 @@ const parseUserInput = async (text) => {
           content: text,
         },
       ],
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       temperature: 0.1, // Low temp for more consistent JSON
       response_format: { type: 'json_object' },
     });
@@ -52,6 +52,47 @@ const parseUserInput = async (text) => {
   }
 };
 
+/**
+ * Generates a productivity insight summary based on task statistics
+ * @param {Object} stats - Computed task metrics
+ * @returns {Promise<string>} - A short, punchy productivity insight
+ */
+const generateTaskSummary = async (stats) => {
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `You are a productivity performance analyst. Analyze the following user statistics and provide a single, punchy, professional, and slightly motivating "Operational Insight" or "Productivity Tip". 
+          
+          Guidelines:
+          - Keep it under 25 words.
+          - Use a professional yet encouraging tone.
+          - Example: "Your focus peaks at 10:30 AM. Schedule your Critical tasks then for maximum output."
+          - Reference the specific numbers if they are interesting (e.g. high completion rate).`,
+        },
+        {
+          role: 'user',
+          content: `User Statistics:
+          Total Tasks: ${stats.total}
+          Completed: ${stats.completed}
+          Completion Rate: ${stats.completionRate}%
+          Most Active Category: ${stats.mostActiveCategory}
+          Urgent/Critical Tasks: ${stats.urgentCount}`,
+        },
+      ],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7, // Higher temp for more natural-sounding advice
+    });
+
+    return chatCompletion.choices[0]?.message?.content || "Keep up the momentum! Your productivity is trending upwards.";
+  } catch (error) {
+    console.error('AI Summary Error:', error);
+    return "Focus on your Critical tasks today to maximize your daily impact.";
+  }
+};
+
 module.exports = {
   parseUserInput,
+  generateTaskSummary,
 };

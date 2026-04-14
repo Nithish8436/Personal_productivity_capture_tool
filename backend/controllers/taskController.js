@@ -1,5 +1,5 @@
 const Task = require('../models/taskModel');
-const { parseUserInput } = require('../services/aiService');
+const { parseUserInput, generateTaskSummary } = require('../services/aiService');
 
 // @desc    Get all tasks
 // @route   GET /api/tasks
@@ -18,7 +18,7 @@ const getTasks = async (req, res) => {
 // @access  Public
 const createTask = async (req, res) => {
   try {
-    const { title, deadline, category, priority } = req.body;
+    const { title, deadline, category, priority, subtasks } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: 'Title is required' });
@@ -29,6 +29,7 @@ const createTask = async (req, res) => {
       deadline,
       category,
       priority,
+      subtasks,
     });
 
     const savedTask = await newTask.save();
@@ -63,8 +64,74 @@ const parseTask = async (req, res) => {
   }
 };
 
+// @desc    Update a task
+// @route   PATCH /api/tasks/:id
+// @access  Public
+const updateTask = async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+    res.status(200).json(task);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating task' });
+  }
+};
+
+// @desc    Delete a task
+// @route   DELETE /api/tasks/:id
+// @access  Public
+const deleteTask = async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting task' });
+  }
+};
+
+// @desc    Get productivity summary + AI insights
+// @route   GET /api/tasks/summary
+// @access  Public
+const getSummary = async (req, res) => {
+  try {
+    const allTasks = await Task.find();
+    
+    // Aggregations
+    const total = allTasks.length;
+    const completed = allTasks.filter(t => t.completed).length;
+    const urgentCount = allTasks.filter(t => (t.priority === 'High' || t.priority === 'Critical') && !t.completed).length;
+    
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    // Category Distribution
+    const byCategory = allTasks.reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + 1;
+      return acc;
+    }, {});
+    
+    const mostActiveCategory = Object.entries(byCategory).sort((a,b) => b[1] - a[1])[0]?.[0] || 'Other';
+
+    // Generate AI Insight
+    const stats = { total, completed, urgentCount, completionRate, mostActiveCategory };
+    const insight = await generateTaskSummary(stats);
+
+    res.status(200).json({
+      ...stats,
+      byCategory,
+      insight
+    });
+  } catch (error) {
+    console.error('Summary Controller Error:', error);
+    res.status(500).json({ message: 'Error generating summary' });
+  }
+};
+
 module.exports = {
   getTasks,
   createTask,
   parseTask,
+  updateTask,
+  deleteTask,
+  getSummary,
 };
