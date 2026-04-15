@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CaptureBox from '../components/CaptureBox';
 import TaskCard from '../components/TaskCard';
-import { Search, Bell, Calendar as CalIcon } from 'lucide-react';
+import { Search, Bell, Calendar as CalIcon, Plus } from 'lucide-react';
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(true);
 
   const fetchTasks = async () => {
     try {
@@ -19,9 +21,41 @@ const Dashboard = () => {
     }
   };
 
+  const fetchSuggestions = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/tasks/suggestions');
+      setSuggestions(response.data);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
   useEffect(() => {
     fetchTasks();
+    fetchSuggestions();
   }, []);
+
+  const handleDecompose = async (id) => {
+    try {
+      const response = await axios.post(`http://localhost:5000/api/tasks/${id}/decompose`);
+      setTasks(tasks.map(t => t._id === id ? response.data : t));
+    } catch (error) {
+      console.error('Error decomposing task:', error);
+      alert('Failed to decompose task. Check backend logs.');
+    }
+  };
+
+  const handleAcceptSuggestion = async (suggestion) => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/tasks', suggestion);
+      setTasks([response.data, ...tasks]);
+      setSuggestions(suggestions.filter(s => s.title !== suggestion.title));
+    } catch (error) {
+      console.error('Error accepting suggestion:', error);
+    }
+  };
 
   const handleToggleStatus = async (id) => {
     const task = tasks.find(t => t._id === id);
@@ -76,7 +110,12 @@ const Dashboard = () => {
               <p className="text-center py-10 text-nordic-muted">Loading tasks...</p>
             ) : tasks.length > 0 ? (
               tasks.map(task => (
-                <TaskCard key={task._id} task={task} onToggleStatus={handleToggleStatus} />
+                <TaskCard 
+                  key={task._id} 
+                  task={task} 
+                  onToggleStatus={handleToggleStatus} 
+                  onDecompose={handleDecompose}
+                />
               ))
             ) : (
               <div className="text-center py-20 bg-white rounded-px border border-dashed border-nordic-border text-nordic-muted">
@@ -88,26 +127,29 @@ const Dashboard = () => {
 
         <aside className="space-y-6">
           <div className="bg-white rounded-px p-6 shadow-sm border border-nordic-border">
-            <h4 className="text-[0.75rem] font-bold text-nordic-mint tracking-[1px] mb-6 uppercase">Curator Insights</h4>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-2 h-2 rounded-full bg-nordic-mint mt-1.5 shrink-0"></div>
-                <div>
-                  <p className="text-sm font-semibold text-nordic-text">Focus Window</p>
-                  <p className="text-[0.8rem] text-nordic-muted leading-relaxed mt-1">
-                    Your energy peaks between 10am-12pm. We've blocked this for deep work.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-2 h-2 rounded-full bg-nordic-mint mt-1.5 shrink-0"></div>
-                <div>
-                  <p className="text-sm font-semibold text-nordic-text">Weekly Pulse</p>
-                  <p className="text-[0.8rem] text-nordic-muted leading-relaxed mt-1">
-                    You are tracking 15% faster than last week. Keep it up!
-                  </p>
-                </div>
-              </div>
+            <h4 className="text-[0.75rem] font-bold text-nordic-mint tracking-[1px] mb-6 uppercase">Suggested Actions</h4>
+            <div className="space-y-4">
+              {loadingSuggestions ? (
+                <p className="text-[0.8rem] text-nordic-muted italic">AI is analyzing patterns...</p>
+              ) : suggestions.length > 0 ? (
+                suggestions.map((sug, i) => (
+                  <div key={i} className="flex gap-4 p-3 border border-slate-100 rounded-lg hover:border-nordic-mint transition-colors group">
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-nordic-text leading-snug">{sug.title}</p>
+                      <p className="text-[0.65rem] font-bold text-nordic-muted uppercase tracking-wider mt-2">{sug.category} • {sug.priority}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleAcceptSuggestion(sug)}
+                      className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-nordic-mint opacity-0 group-hover:opacity-100 transition-all hover:bg-nordic-mint hover:text-white shrink-0"
+                      title="Accept Suggestion"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[0.8rem] text-nordic-muted">No current suggestions.</p>
+              )}
             </div>
           </div>
           

@@ -1,5 +1,5 @@
 const Task = require('../models/taskModel');
-const { parseUserInput, generateTaskSummary } = require('../services/aiService');
+const { parseUserInput, generateTaskSummary, decomposeTask, suggestTasks } = require('../services/aiService');
 
 // @desc    Get all tasks
 // @route   GET /api/tasks
@@ -127,6 +127,43 @@ const getSummary = async (req, res) => {
   }
 };
 
+// @desc    Decompose an existing task into subtasks
+// @route   POST /api/tasks/:id/decompose
+// @access  Public
+const decomposeExistingTask = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+
+    const newSubtasks = await decomposeTask({ title: task.title, category: task.category });
+    
+    // Merge new subtasks with existing ones, or replace if none exist
+    task.subtasks = [...(task.subtasks || []), ...newSubtasks];
+    
+    const updatedTask = await task.save();
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error('Decompose Controller Error:', error);
+    res.status(500).json({ message: 'Error decomposing task' });
+  }
+};
+
+// @desc    Get proactive task suggestions
+// @route   GET /api/tasks/suggestions
+// @access  Public
+const getTaskSuggestions = async (req, res) => {
+  try {
+    // Only get open (non-completed) tasks for context
+    const openTasks = await Task.find({ completed: false }).limit(10);
+    
+    const suggestions = await suggestTasks(openTasks);
+    res.status(200).json(suggestions);
+  } catch (error) {
+    console.error('Suggestions Controller Error:', error);
+    res.status(500).json({ message: 'Error generating suggestions' });
+  }
+};
+
 module.exports = {
   getTasks,
   createTask,
@@ -134,4 +171,6 @@ module.exports = {
   updateTask,
   deleteTask,
   getSummary,
+  decomposeExistingTask,
+  getTaskSuggestions,
 };
