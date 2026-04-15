@@ -1,0 +1,8 @@
+Implemented Tasks page and removed generic AI-branded UI indicators
+
+- Removed Sparkles icon from CaptureBox, replaced with neutral PenLine icon.
+- Removed Sparkles icons from Analytics insight card, replaced with BarChart2 and Lightbulb.
+- Renamed "AI Insight" badge to "Productivity Insight" for professional presentation.
+- Replaced Wand2 icon in TaskCard with neutral Layers icon for subtask decomposition.
+- Implemented full TasksPage (/tasks route) with search, category/priority/status filters,
+  subtask expansion and toggling, inline decompose action with loading state, and delete.

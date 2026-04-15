@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Sparkles } from 'lucide-react';
+import { PenLine } from 'lucide-react';
 
 const CaptureBox = ({ onTaskCaptured }) => {
   const [inputText, setInputText] = useState('');
@@ -30,7 +30,7 @@ const CaptureBox = ({ onTaskCaptured }) => {
   return (
     <div className="my-8">
       <div className="flex items-center bg-white rounded-px p-2 px-3 shadow-sm border border-nordic-border gap-3">
-        <Sparkles size={20} className="text-nordic-mint shrink-0" />
+        <PenLine size={20} className="text-nordic-mint shrink-0" />
         <input
           type="text"
           placeholder="Type anything... (e.g., Finalize report by tomorrow high priority)"

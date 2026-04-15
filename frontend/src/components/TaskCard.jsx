@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Tag, MoreVertical, CheckCircle, Circle, Wand2 } from 'lucide-react';
+import { Calendar, Tag, MoreVertical, CheckCircle, Circle, Layers } from 'lucide-react';
 
 const TaskCard = ({ task, onToggleStatus, onDecompose }) => {
   const priorityStyles = {
@@ -41,11 +41,11 @@ const TaskCard = ({ task, onToggleStatus, onDecompose }) => {
           </h4>
           <div className="flex gap-2">
             {(!task.subtasks || task.subtasks.length === 0) && onDecompose && (
-              <Wand2 
-                size={18} 
-                className="text-nordic-mint cursor-pointer hover:brightness-90 transition-all" 
+              <Layers 
+                size={16} 
+                className="text-slate-400 cursor-pointer hover:text-nordic-mint transition-colors" 
                 onClick={(e) => { e.stopPropagation(); onDecompose(task._id); }} 
-                title="AI Decompose Task"
+                title="Break into subtasks"
               />
             )}
             <MoreVertical size={18} className="text-slate-300 cursor-pointer hover:text-slate-500" />

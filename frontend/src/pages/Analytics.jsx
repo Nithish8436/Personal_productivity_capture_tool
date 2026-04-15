@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TrendingUp, AlertCircle, CheckCircle2, Calendar, Download, Sparkles } from 'lucide-react';
+import { TrendingUp, AlertCircle, CheckCircle2, Calendar, Download, BarChart2, Lightbulb } from 'lucide-react';
 
 const Analytics = () => {
   const [stats, setStats] = useState(null);
@@ -130,23 +130,22 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* AI Insight Box (Image 3 Style) */}
       <div className="bg-nordic-navy rounded-px p-8 text-white relative overflow-hidden group">
-        <div className="absolute right-0 top-0 p-8 opacity-10 group-hover:rotate-12 transition-transform">
-           <Sparkles size={120} />
+        <div className="absolute right-0 top-0 p-8 opacity-5 group-hover:rotate-12 transition-transform">
+           <BarChart2 size={120} />
         </div>
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8">
           <div className="w-16 h-16 bg-nordic-mint/20 rounded-2xl flex items-center justify-center shrink-0">
-             <Sparkles className="text-nordic-mint" size={32} />
+             <Lightbulb className="text-nordic-mint" size={32} />
           </div>
           <div className="flex-1">
              <div className="flex items-center gap-3 mb-2">
-                <span className="px-2.5 py-1 bg-nordic-mint text-nordic-navy text-[0.6rem] font-black uppercase rounded-full tracking-wider">AI Insight</span>
-                <h4 className="text-xl font-bold tracking-tight">Your Focus Peak: 10:30 AM</h4>
+                <span className="px-2.5 py-1 bg-nordic-mint text-nordic-navy text-[0.6rem] font-black uppercase rounded-full tracking-wider">Productivity Insight</span>
+                <h4 className="text-xl font-bold tracking-tight">Performance Summary</h4>
              </div>
              <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-               {stats?.insight || "Analyzing your productivity patterns... Our engine indicates your cognitive performance is 45% higher in the morning window."}
+               {stats?.insight || "Analyzing your productivity patterns... Your performance metrics indicate strong consistency across your tracked goals."}
              </p>
           </div>
           <button className="px-6 py-3 bg-nordic-mint text-nordic-navy font-bold rounded-lg text-sm hover:brightness-110 active:scale-95 transition-all">
