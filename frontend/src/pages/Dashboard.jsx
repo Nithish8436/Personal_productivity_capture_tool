@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import CaptureBox from '../components/CaptureBox';
 import TaskCard from '../components/TaskCard';
-import { Search, Bell, Calendar as CalIcon, Plus } from 'lucide-react';
+import { Search, Bell, Calendar as CalIcon, Plus, X } from 'lucide-react';
+import Calendar from '../components/Calendar';
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -10,6 +11,8 @@ const Dashboard = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -76,10 +79,12 @@ const Dashboard = () => {
     setTasks([newTask, ...tasks]);
   };
 
-  // Filter tasks by search query
-  const filteredTasks = tasks.filter(t =>
-    t.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter tasks by search query AND selected date
+  const filteredTasks = tasks.filter(t => {
+    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDate = !selectedDate || (t.deadline && new Date(t.deadline).toDateString() === selectedDate.toDateString());
+    return matchesSearch && matchesDate;
+  });
 
   // Dynamic completion %
   const completedCount = tasks.filter(t => t.completed).length;
@@ -98,9 +103,23 @@ const Dashboard = () => {
             className="border-none outline-none text-sm flex-1"
           />
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 relative">
           <Bell size={20} className="text-nordic-muted cursor-pointer hover:text-nordic-navy transition-colors" />
-          <CalIcon size={20} className="text-nordic-muted cursor-pointer hover:text-nordic-navy transition-colors" />
+          <div className="relative">
+            <CalIcon 
+              size={20} 
+              className={`cursor-pointer transition-colors ${showCalendar || selectedDate ? 'text-nordic-navy' : 'text-nordic-muted hover:text-nordic-navy'}`} 
+              onClick={(e) => { e.stopPropagation(); setShowCalendar(!showCalendar); }} 
+            />
+            {showCalendar && (
+              <Calendar 
+                tasks={tasks} 
+                selectedDate={selectedDate} 
+                onSelectDate={(date) => { setSelectedDate(date); setShowCalendar(false); }}
+                onClose={() => setShowCalendar(false)}
+              />
+            )}
+          </div>
           <div className="w-9 h-9 rounded-lg bg-slate-200"></div>
         </div>
       </header>
@@ -117,9 +136,21 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 mt-8">
         <div>
           <div className="flex justify-between items-baseline mb-5">
-            <h3 className="text-xl font-bold text-nordic-text">Today's Focus</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-xl font-bold text-nordic-text">
+                {selectedDate ? `Tasks for ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : "Today's Focus"}
+              </h3>
+              {selectedDate && (
+                <button 
+                  onClick={() => setSelectedDate(null)}
+                  className="flex items-center gap-1 text-[0.65rem] font-bold text-nordic-mint uppercase tracking-widest hover:brightness-90 transition-all bg-nordic-mint/10 px-2 py-0.5 rounded"
+                >
+                  <X size={10} /> Clear Filter
+                </button>
+              )}
+            </div>
             <span className="text-xs font-bold text-nordic-muted tracking-wide uppercase">
-              {tasks.filter(t => !t.completed).length} TASKS REMAINING
+              {filteredTasks.filter(t => !t.completed).length} TASKS REMAINING
             </span>
           </div>
 

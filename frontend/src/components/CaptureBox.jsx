@@ -1,13 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { PenLine } from 'lucide-react';
+import { PenLine, Mic, MicOff } from 'lucide-react';
 
 const CaptureBox = ({ onTaskCaptured }) => {
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize SpeechRecognition if available
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setInputText(transcript);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setInputText('');
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const handleProcess = async () => {
     if (!inputText.trim()) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
 
     setIsProcessing(true);
     try {
@@ -29,29 +86,57 @@ const CaptureBox = ({ onTaskCaptured }) => {
 
   return (
     <div className="my-8">
-      <div className="flex items-center bg-white rounded-px p-2 px-3 shadow-sm border border-nordic-border gap-3">
-        <PenLine size={20} className="text-nordic-mint shrink-0" />
+      <div className={`flex items-center bg-white rounded-px p-2 px-3 shadow-sm border transition-all duration-300 gap-3 ${
+        isListening ? 'border-nordic-mint ring-2 ring-nordic-mint/20' : 'border-nordic-border'
+      }`}>
+        <div className="relative flex items-center justify-center shrink-0">
+          <PenLine size={20} className={`transition-opacity duration-300 ${isListening ? 'opacity-0' : 'opacity-100 text-nordic-mint'}`} />
+          {isListening && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2.5 h-2.5 bg-nordic-mint rounded-full animate-ping"></div>
+            </div>
+          )}
+        </div>
         <input
           type="text"
-          placeholder="Type anything... (e.g., Finalize report by tomorrow high priority)"
+          placeholder={isListening ? "Listening..." : "Type anything... (e.g., Finalize report by tomorrow high priority)"}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
           className="flex-1 border-none outline-none text-base text-nordic-text py-2.5 bg-transparent"
           disabled={isProcessing}
         />
-        <button 
-          onClick={handleProcess} 
-          className={`bg-nordic-navy text-white px-5 py-2 rounded-lg font-semibold text-sm transition-all hover:bg-slate-800 shrink-0 ${
-            isProcessing ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer active:scale-95'
-          }`}
-          disabled={isProcessing}
-        >
-          {isProcessing ? 'Processing...' : 'Process'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleListening}
+            className={`p-2.5 rounded-lg transition-all ${
+              isListening 
+                ? 'bg-nordic-mint text-white animate-pulse' 
+                : 'text-nordic-muted hover:bg-slate-50 hover:text-nordic-navy'
+            }`}
+            title={isListening ? "Stop listening" : "Start voice input"}
+          >
+            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
+          <button 
+            onClick={handleProcess} 
+            className={`bg-nordic-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all hover:bg-slate-800 shrink-0 ${
+              isProcessing || !inputText.trim() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'
+            }`}
+            disabled={isProcessing || !inputText.trim()}
+          >
+            {isProcessing ? 'Processing...' : 'Process'}
+          </button>
+        </div>
       </div>
+      {isListening && (
+        <p className="text-[0.65rem] font-bold text-nordic-mint uppercase tracking-[2px] mt-2 ml-1 animate-pulse">
+          Recording Audio...
+        </p>
+      )}
     </div>
   );
 };
 
 export default CaptureBox;
+
