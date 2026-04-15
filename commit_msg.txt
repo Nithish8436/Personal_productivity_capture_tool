@@ -1,8 +1,22 @@
-Implemented Tasks page and removed generic AI-branded UI indicators
+Added intelligent task decomposition, suggestions, Tasks page, and real-time updates
 
-- Removed Sparkles icon from CaptureBox, replaced with neutral PenLine icon.
-- Removed Sparkles icons from Analytics insight card, replaced with BarChart2 and Lightbulb.
-- Renamed "AI Insight" badge to "Productivity Insight" for professional presentation.
-- Replaced Wand2 icon in TaskCard with neutral Layers icon for subtask decomposition.
-- Implemented full TasksPage (/tasks route) with search, category/priority/status filters,
-  subtask expansion and toggling, inline decompose action with loading state, and delete.
+Day 7 Features:
+- Intelligent task decomposition: Break tasks into subtasks via Layers icon
+- Proactive suggestions: Sidebar widget with context-aware task recommendations
+- Full Tasks page: Search, filter by category/priority/status, inline subtask toggling, delete
+
+UI/UX Improvements:
+- Removed AI-branded icons (Sparkles/Wand2) for professional presentation
+- Increased font sizes across all components for better readability
+- Fluid full-width layout replacing narrow centered containers
+- Working sidebar navigation with New Entry button
+- Dynamic search filtering on Dashboard
+
+Real-time Updates:
+- Auto-refresh polling (30s) on Dashboard and Analytics
+- Dynamic Analytics: real completion donut, weekly bar chart from task data, category breakdown
+- Working Export CSV button for task data download
+- Dynamic Weekly Pulse widget with live completion percentage
+
+AI Enhancement:
+- Injected real-time date context into AI prompt for relative date parsing (tomorrow, next Monday, etc.)

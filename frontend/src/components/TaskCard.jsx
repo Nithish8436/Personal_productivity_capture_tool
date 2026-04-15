@@ -53,7 +53,7 @@ const TaskCard = ({ task, onToggleStatus, onDecompose }) => {
         </div>
 
         <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-1.5 text-nordic-muted text-[0.75rem]">
+          <div className="flex items-center gap-1.5 text-nordic-muted text-xs">
             <Calendar size={14} />
             <span>{formatDate(task.deadline) || 'No deadline'}</span>
           </div>
@@ -61,7 +61,7 @@ const TaskCard = ({ task, onToggleStatus, onDecompose }) => {
             <Tag size={14} />
             <span>{task.category}</span>
           </div>
-          <div className={`px-2 py-0.5 rounded text-[0.65rem] font-bold tracking-wider uppercase ${priorityStyles[task.priority]}`}>
+          <div className={`px-2 py-0.5 rounded text-xs font-bold tracking-wider uppercase ${priorityStyles[task.priority]}`}>
             {task.priority || 'MEDIUM'}
           </div>
         </div>
@@ -74,7 +74,7 @@ const TaskCard = ({ task, onToggleStatus, onDecompose }) => {
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <span className="text-[0.7rem] text-nordic-muted font-medium whitespace-nowrap">
+            <span className="text-xs text-nordic-muted font-medium whitespace-nowrap">
               {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks
             </span>
           </div>

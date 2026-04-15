@@ -108,7 +108,7 @@ const TasksPage = () => {
   const progressPct = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
   return (
-    <div className="max-w-[1100px] mx-auto">
+    <div className="w-full max-w-screen-2xl">
       {/* Page Header */}
       <header className="flex justify-between items-end mb-10">
         <div>
@@ -234,13 +234,13 @@ const TasksPage = () => {
                     </h4>
 
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="flex items-center gap-1 text-[0.75rem] text-nordic-muted">
+                      <span className="flex items-center gap-1 text-xs text-nordic-muted">
                         <Calendar size={13} /> {formatDate(task.deadline)}
                       </span>
-                      <span className="flex items-center gap-1 text-[0.75rem] text-nordic-muted">
+                      <span className="flex items-center gap-1 text-xs text-nordic-muted">
                         <Tag size={13} /> {task.category}
                       </span>
-                      <span className={`px-2 py-0.5 rounded text-[0.65rem] font-bold tracking-wider uppercase ${priorityStyles[task.priority] || 'bg-slate-100 text-slate-500'}`}>
+                      <span className={`px-2 py-0.5 rounded text-xs font-bold tracking-wider uppercase ${priorityStyles[task.priority] || 'bg-slate-100 text-slate-500'}`}>
                         {task.priority}
                       </span>
                     </div>
@@ -254,7 +254,7 @@ const TasksPage = () => {
                             style={{ width: `${progress}%` }}
                           />
                         </div>
-                        <span className="text-[0.7rem] text-nordic-muted font-medium whitespace-nowrap">
+                        <span className="text-xs text-nordic-muted font-medium whitespace-nowrap">
                           {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks
                         </span>
                       </div>

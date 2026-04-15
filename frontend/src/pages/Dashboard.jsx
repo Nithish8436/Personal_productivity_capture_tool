@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import CaptureBox from '../components/CaptureBox';
 import TaskCard from '../components/TaskCard';
@@ -9,8 +9,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/tasks');
       setTasks(response.data);
@@ -19,7 +20,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const fetchSuggestions = async () => {
     try {
@@ -32,10 +33,13 @@ const Dashboard = () => {
     }
   };
 
+  // Initial fetch + auto-refresh tasks every 30 seconds
   useEffect(() => {
     fetchTasks();
     fetchSuggestions();
-  }, []);
+    const interval = setInterval(() => fetchTasks(), 30000);
+    return () => clearInterval(interval);
+  }, [fetchTasks]);
 
   const handleDecompose = async (id) => {
     try {
@@ -43,7 +47,6 @@ const Dashboard = () => {
       setTasks(tasks.map(t => t._id === id ? response.data : t));
     } catch (error) {
       console.error('Error decomposing task:', error);
-      alert('Failed to decompose task. Check backend logs.');
     }
   };
 
@@ -73,12 +76,27 @@ const Dashboard = () => {
     setTasks([newTask, ...tasks]);
   };
 
+  // Filter tasks by search query
+  const filteredTasks = tasks.filter(t =>
+    t.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Dynamic completion %
+  const completedCount = tasks.filter(t => t.completed).length;
+  const completionPct = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+
   return (
-    <div className="max-w-[1200px] mx-auto">
+    <div className="w-full max-w-screen-2xl">
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center bg-white px-4 py-2.5 rounded-lg shadow-sm w-[400px] gap-3 border border-nordic-border">
           <Search size={18} className="text-nordic-muted" />
-          <input type="text" placeholder="Search operations..." className="border-none outline-none text-sm flex-1" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border-none outline-none text-sm flex-1"
+          />
         </div>
         <div className="flex items-center gap-6">
           <Bell size={20} className="text-nordic-muted cursor-pointer hover:text-nordic-navy transition-colors" />
@@ -100,7 +118,7 @@ const Dashboard = () => {
         <div>
           <div className="flex justify-between items-baseline mb-5">
             <h3 className="text-xl font-bold text-nordic-text">Today's Focus</h3>
-            <span className="text-[0.7rem] font-bold text-nordic-muted tracking-wide uppercase">
+            <span className="text-xs font-bold text-nordic-muted tracking-wide uppercase">
               {tasks.filter(t => !t.completed).length} TASKS REMAINING
             </span>
           </div>
@@ -108,8 +126,8 @@ const Dashboard = () => {
           <div className="space-y-4">
             {loading ? (
               <p className="text-center py-10 text-nordic-muted">Loading tasks...</p>
-            ) : tasks.length > 0 ? (
-              tasks.map(task => (
+            ) : filteredTasks.length > 0 ? (
+              filteredTasks.map(task => (
                 <TaskCard 
                   key={task._id} 
                   task={task} 
@@ -119,7 +137,7 @@ const Dashboard = () => {
               ))
             ) : (
               <div className="text-center py-20 bg-white rounded-px border border-dashed border-nordic-border text-nordic-muted">
-                No tasks found. Try capturing one above!
+                {searchQuery ? 'No tasks match your search.' : 'No tasks found. Try capturing one above!'}
               </div>
             )}
           </div>
@@ -127,16 +145,16 @@ const Dashboard = () => {
 
         <aside className="space-y-6">
           <div className="bg-white rounded-px p-6 shadow-sm border border-nordic-border">
-            <h4 className="text-[0.75rem] font-bold text-nordic-mint tracking-[1px] mb-6 uppercase">Suggested Actions</h4>
+            <h4 className="text-xs font-bold text-nordic-mint tracking-[1px] mb-6 uppercase">Suggested Actions</h4>
             <div className="space-y-4">
               {loadingSuggestions ? (
-                <p className="text-[0.8rem] text-nordic-muted italic">AI is analyzing patterns...</p>
+                <p className="text-sm text-nordic-muted italic">Analyzing patterns...</p>
               ) : suggestions.length > 0 ? (
                 suggestions.map((sug, i) => (
                   <div key={i} className="flex gap-4 p-3 border border-slate-100 rounded-lg hover:border-nordic-mint transition-colors group">
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-nordic-text leading-snug">{sug.title}</p>
-                      <p className="text-[0.65rem] font-bold text-nordic-muted uppercase tracking-wider mt-2">{sug.category} • {sug.priority}</p>
+                      <p className="text-xs font-bold text-nordic-muted uppercase tracking-wider mt-2">{sug.category} • {sug.priority}</p>
                     </div>
                     <button 
                       onClick={() => handleAcceptSuggestion(sug)}
@@ -148,26 +166,26 @@ const Dashboard = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-[0.8rem] text-nordic-muted">No current suggestions.</p>
+                <p className="text-sm text-nordic-muted">No current suggestions.</p>
               )}
             </div>
           </div>
           
           <div className="bg-nordic-navy rounded-px p-6 text-white overflow-hidden relative group cursor-pointer transition-transform active:scale-95">
              <div className="absolute top-0 right-0 w-32 h-32 bg-nordic-mint/10 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-             <h4 className="text-[0.7rem] font-bold text-nordic-mint tracking-wider mb-2">WEEKLY PULSE</h4>
-             <p className="text-xl font-bold leading-tight relative z-10">Syncing Operations</p>
+             <h4 className="text-xs font-bold text-nordic-mint tracking-wider mb-2">WEEKLY PULSE</h4>
+             <p className="text-xl font-bold leading-tight relative z-10">Task Progress</p>
              <div className="mt-6">
                <div className="flex justify-between items-end mb-1">
-                 <span className="text-[0.65rem] font-bold uppercase text-nordic-mint">Completion</span>
-                 <span className="text-lg font-bold">82%</span>
+                 <span className="text-xs font-bold uppercase text-nordic-mint">Completion</span>
+                 <span className="text-lg font-bold">{completionPct}%</span>
                </div>
                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                 <div className="h-full bg-nordic-mint w-[82%]"></div>
+                 <div className="h-full bg-nordic-mint transition-all duration-500" style={{ width: `${completionPct}%` }}></div>
                </div>
              </div>
-             <p className="text-[0.7rem] text-white/50 mt-4 leading-relaxed">
-               You are tracking 15% faster than last week. Focus remains high.
+             <p className="text-xs text-white/50 mt-4 leading-relaxed">
+               {completedCount} of {tasks.length} tasks completed. {completionPct >= 75 ? 'Excellent focus!' : 'Stay consistent.'}
              </p>
           </div>
         </aside>

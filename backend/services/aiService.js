@@ -11,11 +11,19 @@ const groq = new Groq({
  */
 const parseUserInput = async (text) => {
   try {
+    // Inject current date so AI can resolve "tomorrow", "next week", etc.
+    const now = new Date();
+    const todayStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
           role: 'system',
           content: `You are a productivity assistant. Convert the user's unstructured input into a structured JSON object.
+          
+          IMPORTANT - Today's date is: ${todayStr} (${now.toISOString().slice(0, 10)}).
+          Use this to resolve any relative dates like "tomorrow", "today", "next Monday", "this Friday", "in 3 days", "next week", etc.
+          For example, if today is Wednesday April 15 2026, then "tomorrow" = 2026-04-16, "next Monday" = 2026-04-21.
           
           The JSON object must follow this schema:
           {
