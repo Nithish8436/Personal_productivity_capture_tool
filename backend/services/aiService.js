@@ -27,7 +27,10 @@ const parseUserInput = async (text) => {
           
           The JSON object must follow this schema:
           {
-            "title": "Short descriptive title of the task",
+            "title": "Short descriptive title",
+            "description": "Full details, content, or the actual information being captured (e.g. the password itself, server details, or specific note content)",
+            "itemType": "One of: Task, Note, Reminder, To-do",
+            "tags": ["extracted-keyword-1", "extracted-keyword-2"],
             "deadline": "ISO 8601 date string or null if not mentioned",
             "category": "One of: Work, Personal, Health, Learning, Finance, Other",
             "priority": "One of: Low, Medium, High, Critical",
@@ -37,9 +40,13 @@ const parseUserInput = async (text) => {
           }
 
           Rules:
+          - 'Note': Informational thoughts or facts (e.g., "The client wants portrait layout").
+          - 'Task': Actionable items that can be completed.
+          - 'Reminder': Time-sensitive prompts (e.g., "Call the bank tomorrow").
+          - 'To-do': Simple list items (e.g., "Buy milk").
+          - Tags: Extract 1-3 semantic keywords for easy retrieval later.
           - If no priority is implied, default to 'Medium'.
           - If no category is implied, default to 'Other'.
-          - Break down complex tasks into 2-4 subtasks if possible.
           - Respond ONLY with the JSON object. No preamble or markdown blocks.`,
         },
         {
@@ -154,12 +161,14 @@ const suggestTasks = async (activeTasks) => {
           role: 'system',
           content: `You are a proactive AI assistant. Based on the user's current open tasks, suggest 2 logical next tasks they might need to do.
           
-          Respond ONLY with a JSON array of objects.
+          Respond ONLY with a JSON object containing a "suggestions" key.
           Format:
-          [
-            { "title": "Suggested task 1", "priority": "Medium", "category": "Work" },
-            { "title": "Suggested task 2", "priority": "Low", "category": "Personal" }
-          ]
+          {
+            "suggestions": [
+              { "title": "Suggested task 1", "priority": "Medium", "category": "Work" },
+              { "title": "Suggested task 2", "priority": "Low", "category": "Personal" }
+            ]
+          }
           
           Make the suggestions actionable and relevant. No markdown.`,
         },
@@ -170,13 +179,67 @@ const suggestTasks = async (activeTasks) => {
       ],
       model: 'llama-3.3-70b-versatile',
       temperature: 0.5,
+      response_format: { type: 'json_object' },
+    });
+
+    const responseContent = chatCompletion.choices[0]?.message?.content;
+    const result = JSON.parse(responseContent);
+    return result.suggestions || [];
+  } catch (error) {
+    console.error('AI Suggestion Error:', error);
+    return [];
+  }
+};
+
+/**
+ * Uses AI to find semantic connections between a current task and historical data
+ * @param {Object} currentTask - The task being inspected
+ * @param {Array} history - A list of past tasks/notes to compare against
+ * @returns {Promise<Array>} - Array of connected task IDs and the reason for the link
+ */
+const discoverRelatedContext = async (currentTask, history) => {
+  try {
+    if (history.length === 0) return [];
+    
+    const historicalContext = history.map(h => ({ id: h._id, title: h.title, tags: h.tags, description: h.description }));
+    
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `You are a knowledge graph specialist. Your task is to identify SEMANTIC connections between a "Current Task" and a "List of Past Items".
+          
+          Connection criteria:
+          - Shares the same subject matter (e.g., both about a specific project).
+          - Logical sequence (e.g., one is a follow-up to the other).
+          - Shared entities (e.g., people, software, locations).
+          - Conceptual overlap (e.g., both are about "WiFi configuration").
+          
+          Respond ONLY with a JSON array identifying the matches.
+          Format: 
+          [
+            { "id": "original-mongodb-id", "reason": "Short reason why they are connected" }
+          ]
+          
+          If no logical connection exists, return an empty array [].
+          Limit to the top 2 most relevant connections.`,
+        },
+        {
+          role: 'user',
+          content: `Current Task: Title: "${currentTask.title}", Description: "${currentTask.description}", Tags: ${JSON.stringify(currentTask.tags)}
+          
+          List of Past Items: ${JSON.stringify(historicalContext)}`,
+        },
+      ],
+      model: 'llama-3.1-8b-instant', // Faster model for background links
+      temperature: 0.1,
       response_format: { type: 'json_array' },
     });
 
     const responseContent = chatCompletion.choices[0]?.message?.content;
     return JSON.parse(responseContent);
   } catch (error) {
-    console.error('AI Suggestion Error:', error);
+    console.error('AI Link Error:', error);
     return [];
   }
 };
@@ -186,4 +249,5 @@ module.exports = {
   generateTaskSummary,
   decomposeTask,
   suggestTasks,
+  discoverRelatedContext,
 };

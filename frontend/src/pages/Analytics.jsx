@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { TrendingUp, AlertCircle, CheckCircle2, Download, BarChart2, Lightbulb, RefreshCw } from 'lucide-react';
+import { TrendingUp, AlertCircle, CheckCircle2, Download, BarChart2, BarChart3, RefreshCw, Layers } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 const Analytics = () => {
   const [stats, setStats] = useState(null);
@@ -82,30 +83,32 @@ const Analytics = () => {
 
   return (
     <div className="w-full max-w-screen-2xl pb-10">
-      <header className="flex justify-between items-center mb-10">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
         <div>
-          <p className="text-xs font-bold text-nordic-muted tracking-widest uppercase mb-1">Operational Insights</p>
-          <h2 className="text-3xl font-bold text-nordic-text">Performance Summary</h2>
+          <p className="text-[0.65rem] md:text-xs font-bold text-nordic-muted tracking-widest uppercase mb-1">Operational Insights</p>
+          <h2 className="text-3xl font-bold text-nordic-text leading-none mt-1">Performance Summary</h2>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-2 md:gap-3 items-center w-full md:w-auto justify-between md:justify-end mt-2 md:mt-0">
           {lastUpdated && (
-            <span className="text-xs text-nordic-muted mr-2">
+            <span className="text-[0.65rem] md:text-xs text-nordic-muted md:mr-2">
               Updated {lastUpdated.toLocaleTimeString()}
             </span>
           )}
-          <button
-            onClick={() => fetchData(true)}
-            className={`p-2 bg-white border border-nordic-border rounded-lg hover:bg-slate-50 transition-all ${refreshing ? 'animate-spin' : ''}`}
-            title="Refresh data"
-          >
-            <RefreshCw size={16} className="text-nordic-muted" />
-          </button>
-          <button
-            onClick={handleExportCSV}
-            className="px-4 py-2 bg-white border border-nordic-border rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 transition-all"
-          >
-            <Download size={16} /> Export CSV
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => fetchData(true)}
+              className={`p-2 bg-white border border-nordic-border rounded-lg hover:bg-slate-50 transition-all ${refreshing ? 'animate-spin' : ''}`}
+              title="Refresh data"
+            >
+              <RefreshCw size={16} className="text-nordic-muted" />
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="px-3 md:px-4 py-2 bg-white border border-nordic-border rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Download size={16} /> <span className="hidden md:inline">Export CSV</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -153,42 +156,75 @@ const Analytics = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         {/* Weekly Productivity Bar Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-px border border-nordic-border shadow-sm">
+        <div className="lg:col-span-2 bg-white p-8 rounded-px border border-nordic-border shadow-sm flex flex-col">
           <div className="flex justify-between items-center mb-10">
-            <h4 className="font-bold text-nordic-text">Weekly Productivity</h4>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-nordic-navy"></div>
-              <span className="text-xs font-semibold text-nordic-muted uppercase">Tasks Created</span>
+            <h4 className="font-bold text-nordic-text uppercase tracking-widest text-sm">Weekly Productivity</h4>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-nordic-mint"></div>
+                <span className="text-[0.65rem] font-bold text-nordic-muted uppercase tracking-wider text-xs">Tasks Created</span>
+              </div>
             </div>
           </div>
           
-          <div className="flex justify-between items-end h-48 gap-4 px-4">
-            {(() => {
-              const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-              const dayCounts = new Array(7).fill(0);
-              allTasks.forEach(t => {
-                const day = new Date(t.createdAt).getDay();
-                dayCounts[day]++;
-              });
-              // Reorder to MON-SUN
-              const ordered = [...dayCounts.slice(1), dayCounts[0]];
-              const orderedNames = [...dayNames.slice(1), dayNames[0]];
-              const maxCount = Math.max(...ordered, 1);
-
-              return orderedNames.map((day, i) => (
-                <div key={day} className="flex flex-col items-center flex-1 gap-4">
-                  <div 
-                    className="w-full bg-nordic-navy rounded-t-sm transition-all duration-1000 relative group cursor-pointer hover:bg-nordic-teal" 
-                    style={{ height: `${(ordered[i] / maxCount) * 100}%`, minHeight: ordered[i] > 0 ? '8px' : '2px' }}
-                  >
-                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-nordic-text opacity-0 group-hover:opacity-100 transition-opacity">
-                      {ordered[i]}
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold text-nordic-muted">{day}</span>
-                </div>
-              ));
-            })()}
+          <div className="flex-1 h-[400px] -ml-6">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={(() => {
+                  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                  const dayCounts = new Array(7).fill(0);
+                  allTasks.forEach(t => {
+                    const day = new Date(t.createdAt).getDay();
+                    dayCounts[day]++;
+                  });
+                  // Order: Mon, Tue, Wed, Thu, Fri, Sat, Sun
+                  const orderedIndices = [1, 2, 3, 4, 5, 6, 0];
+                  return orderedIndices.map(idx => ({
+                    name: dayNames[idx],
+                    count: dayCounts[idx]
+                  }));
+                })()}
+                margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#00F5D4" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#00F5D4" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} 
+                  dy={10}
+                />
+                <YAxis hide domain={[0, 'auto']} />
+                <Tooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-nordic-navy text-white px-3 py-2 rounded-lg shadow-xl border border-white/10">
+                          <p className="text-[0.65rem] font-bold uppercase tracking-widest text-nordic-mint mb-0.5">{payload[0].payload.name}</p>
+                          <p className="text-sm font-bold">{payload[0].value} Tasks</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="count" 
+                  stroke="#00F5D4" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorCount)" 
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -247,22 +283,22 @@ const Analytics = () => {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8">
           <div className="w-16 h-16 bg-nordic-mint/20 rounded-2xl flex items-center justify-center shrink-0">
-             <Lightbulb className="text-nordic-mint" size={32} />
+             <BarChart3 className="text-nordic-mint" size={32} />
           </div>
           <div className="flex-1">
              <div className="flex items-center gap-3 mb-2">
-                <span className="px-2.5 py-1 bg-nordic-mint text-nordic-navy text-xs font-black uppercase rounded-full tracking-wider">Productivity Insight</span>
+                <span className="px-2.5 py-1 bg-nordic-mint text-nordic-navy text-xs font-black uppercase rounded-full tracking-wider">Strategic Analysis</span>
                 <h4 className="text-xl font-bold tracking-tight">Performance Summary</h4>
              </div>
              <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-               {stats?.insight || "Add more tasks to receive personalized productivity insights."}
+                {stats?.insight || "Add more tasks to receive personalized performance insights."}
              </p>
           </div>
           <button
             onClick={() => fetchData(true)}
             className="px-6 py-3 bg-nordic-mint text-nordic-navy font-bold rounded-lg text-sm hover:brightness-110 active:scale-95 transition-all"
           >
-            Refresh Insights
+            Update Analysis
           </button>
         </div>
       </div>

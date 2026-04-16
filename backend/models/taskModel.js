@@ -1,9 +1,17 @@
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  },
   title: {
     type: String,
     required: [true, 'Task title is required']
+  },
+  description: {
+    type: String
   },
   deadline: {
     type: Date
@@ -16,6 +24,15 @@ const taskSchema = new mongoose.Schema({
     type: String,
     enum: ['Low', 'Medium', 'High', 'Critical'],
     default: 'Medium'
+  },
+  itemType: {
+    type: String,
+    enum: ['Task', 'Note', 'Reminder', 'To-do'],
+    default: 'Task'
+  },
+  tags: {
+    type: [String],
+    default: []
   },
   completed: {
     type: Boolean,

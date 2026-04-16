@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, X } from 'lucide-react';
 
 const Calendar = ({ tasks, selectedDate, onSelectDate, onClose }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showMonthMenu, setShowMonthMenu] = useState(false);
+  const [showYearMenu, setShowYearMenu] = useState(false);
 
   // Helper to get days in month
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -66,16 +68,76 @@ const Calendar = ({ tasks, selectedDate, onSelectDate, onClose }) => {
     return selectedDate && date.toDateString() === selectedDate.toDateString();
   };
 
+  const handleMonthChange = (e) => {
+    setCurrentDate(new Date(currentDate.getFullYear(), parseInt(e.target.value), 1));
+  };
+
+  const handleYearChange = (e) => {
+    setCurrentDate(new Date(parseInt(e.target.value), currentDate.getMonth(), 1));
+  };
+
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+
   return (
     <div 
       className="absolute top-14 right-0 z-50 w-80 bg-white/95 backdrop-blur-md rounded-2xl border border-nordic-border shadow-2xl p-5 select-none animate-in fade-in slide-in-from-top-2 duration-200"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h4 className="text-sm font-bold text-nordic-text uppercase tracking-widest">
-            {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
-          </h4>
+        <div className="flex gap-2 items-center">
+          {/* Custom Month Dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => { setShowMonthMenu(!showMonthMenu); setShowYearMenu(false); }}
+              className="flex items-center gap-1 text-xs font-bold text-nordic-text uppercase tracking-widest hover:text-nordic-mint transition-colors appearance-none outline-none"
+            >
+              {months[currentDate.getMonth()]} <ChevronDown size={14} className="text-nordic-muted" />
+            </button>
+            
+            {showMonthMenu && (
+              <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-nordic-border overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="max-h-48 overflow-y-auto no-scrollbar py-1">
+                  {months.map((m, i) => (
+                    <div 
+                      key={i} 
+                      onClick={() => { handleMonthChange({ target: { value: i }}); setShowMonthMenu(false); }}
+                      className={`px-3 py-2 text-xs font-semibold cursor-pointer transition-colors ${currentDate.getMonth() === i ? 'bg-nordic-mint/10 text-nordic-mint' : 'text-nordic-text hover:bg-slate-50'}`}
+                    >
+                      {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Custom Year Dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => { setShowYearMenu(!showYearMenu); setShowMonthMenu(false); }}
+              className="flex items-center gap-1 text-xs font-bold text-nordic-text uppercase tracking-widest hover:text-nordic-mint transition-colors appearance-none outline-none"
+            >
+              {currentDate.getFullYear()} <ChevronDown size={14} className="text-nordic-muted" />
+            </button>
+            
+            {showYearMenu && (
+              <div className="absolute top-full left-0 mt-2 w-24 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-nordic-border overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="max-h-48 overflow-y-auto no-scrollbar py-1">
+                  {years.map(y => (
+                    <div 
+                      key={y} 
+                      onClick={() => { handleYearChange({ target: { value: y }}); setShowYearMenu(false); }}
+                      className={`px-3 py-2 text-xs font-semibold cursor-pointer transition-colors ${currentDate.getFullYear() === y ? 'bg-nordic-mint/10 text-nordic-mint' : 'text-nordic-text hover:bg-slate-50'}`}
+                    >
+                      {y}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button 

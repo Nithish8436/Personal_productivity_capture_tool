@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { PenLine, Mic, MicOff } from 'lucide-react';
+import { PenLine, Mic, MicOff, ArrowRight } from 'lucide-react';
 
 const CaptureBox = ({ onTaskCaptured }) => {
   const [inputText, setInputText] = useState('');
@@ -86,11 +86,11 @@ const CaptureBox = ({ onTaskCaptured }) => {
 
   return (
     <div className="my-8">
-      <div className={`flex items-center bg-white rounded-px p-2 px-3 shadow-sm border transition-all duration-300 gap-3 ${
+      <div className={`flex items-center bg-white rounded-px p-1.5 md:p-2 px-3 shadow-sm border transition-all duration-300 gap-2 md:gap-3 ${
         isListening ? 'border-nordic-mint ring-2 ring-nordic-mint/20' : 'border-nordic-border'
       }`}>
         <div className="relative flex items-center justify-center shrink-0">
-          <PenLine size={20} className={`transition-opacity duration-300 ${isListening ? 'opacity-0' : 'opacity-100 text-nordic-mint'}`} />
+          <PenLine size={18} className={`transition-opacity duration-300 ${isListening ? 'opacity-0' : 'opacity-100 text-nordic-mint'}`} />
           {isListening && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-2.5 h-2.5 bg-nordic-mint rounded-full animate-ping"></div>
@@ -99,17 +99,17 @@ const CaptureBox = ({ onTaskCaptured }) => {
         </div>
         <input
           type="text"
-          placeholder={isListening ? "Listening..." : "Type anything... (e.g., Finalize report by tomorrow high priority)"}
+          placeholder={isListening ? "Listening..." : (window.innerWidth < 1024 ? "Capture thought..." : "Type anything... (e.g., Finalize report by tomorrow high priority)")}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
-          className="flex-1 border-none outline-none text-base text-nordic-text py-2.5 bg-transparent"
+          className="flex-1 border-none outline-none text-sm md:text-base text-nordic-text py-2 md:py-2.5 bg-transparent min-w-0"
           disabled={isProcessing}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           <button
             onClick={toggleListening}
-            className={`p-2.5 rounded-lg transition-all ${
+            className={`p-2 md:p-2.5 rounded-lg transition-all ${
               isListening 
                 ? 'bg-nordic-mint text-white animate-pulse' 
                 : 'text-nordic-muted hover:bg-slate-50 hover:text-nordic-navy'
@@ -120,12 +120,22 @@ const CaptureBox = ({ onTaskCaptured }) => {
           </button>
           <button 
             onClick={handleProcess} 
-            className={`bg-nordic-navy text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-all hover:bg-slate-800 shrink-0 ${
+            className={`bg-nordic-navy text-white p-2.5 md:px-5 md:py-2.5 rounded-lg font-semibold text-sm transition-all hover:bg-slate-800 shrink-0 flex items-center justify-center gap-2 ${
               isProcessing || !inputText.trim() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'
             }`}
             disabled={isProcessing || !inputText.trim()}
           >
-            {isProcessing ? 'Processing...' : 'Process'}
+            {isProcessing ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="hidden md:inline">Processing...</span>
+              </>
+            ) : (
+              <>
+                <span className="hidden md:inline">Process</span>
+                <ArrowRight size={18} className="md:hidden" />
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -139,4 +149,3 @@ const CaptureBox = ({ onTaskCaptured }) => {
 };
 
 export default CaptureBox;
-
