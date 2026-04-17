@@ -8,31 +8,32 @@ An AI-powered system that converts unstructured natural language input into stru
 - **Database** – MongoDB (Mongoose)
 - **AI** – Groq API (Llama3)
 
-## Project Structure
+## 🏗 Product Architecture
+The system is divided into modular segments for scalability and clarity:
 
-```
-├── backend/
-│   ├── config/      # DB connection
-│   ├── models/      # Mongoose schemas
-│   ├── server.js
-│   └── .env
-└── frontend/
-    └── src/
-```
+- 🎨 **[Frontend Documentation](./frontend/README.md)** – UI/UX, Design System, and Components.
+- ⚙️ **[Backend Documentation](./backend/README.md)** – API logic, Services, and Watchdogs.
+- 📊 **[Database Schema](./DATABASE.md)** – MongoDB Data Modeling and Indices.
+- 🧠 **[AI Implementation](./AI_MODEL.md)** – NLP Parsing, Llama3, and Semantic Recall.
 
-## Getting Started
+## 🚀 Quick Start
 
-### Backend
+### 1. Environment Setup
+Create a `.env` in the `backend/` folder (see [Backend Docs](./backend/README.md) for keys).
+
+### 2. Launch Backend
 ```bash
 cd backend
 npm install
-# Add your MONGO_URI and GROQ_API_KEY to .env
 npm run dev
 ```
 
-### Frontend
+### 3. Launch Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+---
+*Developed with focus on speed, aesthetics, and intelligence.*
