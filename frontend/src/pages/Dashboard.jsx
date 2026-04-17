@@ -4,7 +4,8 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import CaptureBox from '../components/CaptureBox';
 import TaskCard from '../components/TaskCard';
-import { Search, Bell, Calendar as CalIcon, Plus, X } from 'lucide-react';
+import QuickCreateModal from '../components/QuickCreateModal';
+import { Search, Bell, Calendar as CalIcon, Plus, X, PencilLine } from 'lucide-react';
 import Calendar from '../components/Calendar';
 import NotificationPopover from '../components/NotificationPopover';
 import DailySummary from '../components/DailySummary';
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [isSearching, setIsSearching] = useState(false);
   const [reminderTriggered, setReminderTriggered] = useState(false);
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
   
   // Track triggered notification IDs to avoid repeating animations
   const [triggeredIds, setTriggeredIds] = useState(new Set());
@@ -245,6 +247,13 @@ const Dashboard = () => {
         </div>
         <div className="flex items-center justify-between w-full md:w-auto gap-4 md:gap-6 relative order-1 md:order-2">
            <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsQuickCreateOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-nordic-navy text-white rounded-lg hover:bg-nordic-navy/90 transition-all shadow-lg shadow-nordic-navy/10 active:scale-95"
+            >
+              <Plus size={16} className="text-nordic-mint" />
+              <span className="text-[0.65rem] font-black uppercase tracking-widest hidden sm:inline">Manual Entry</span>
+            </button>
             <div className="relative">
               <Bell 
                 size={20} 
@@ -292,13 +301,6 @@ const Dashboard = () => {
       </header>
 
       <section className="mb-8 relative">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="px-3 py-1 bg-nordic-navy text-nordic-mint text-[0.6rem] font-black uppercase tracking-[2px] rounded-full flex items-center gap-2 shadow-lg shadow-nordic-navy/10 border border-white/10 animate-in fade-in slide-in-from-left-4 duration-1000">
-            <div className="w-1.5 h-1.5 bg-nordic-mint rounded-full animate-pulse"></div>
-            AI-Engine Active
-          </div>
-          <span className="text-[0.6rem] font-bold text-nordic-muted uppercase tracking-widest opacity-60">Professional Edition</span>
-        </div>
         <h2 className="text-4xl md:text-6xl font-black text-nordic-navy tracking-tighter leading-none mb-4">
           {getGreeting()}, {user?.name ? user.name.split(' ')[0] : 'User'}.
         </h2>
@@ -431,6 +433,12 @@ const Dashboard = () => {
           </div>
         </aside>
       </div>
+      
+      <QuickCreateModal 
+        isOpen={isQuickCreateOpen} 
+        onClose={() => setIsQuickCreateOpen(false)}
+        onTaskCreated={() => fetchTasks()}
+      />
     </div>
   );
 };
