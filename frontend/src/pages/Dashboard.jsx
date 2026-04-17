@@ -291,12 +291,19 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <section className="mb-6">
-        <h2 className="text-4xl md:text-5xl font-black text-nordic-text tracking-tight">
+      <section className="mb-8 relative">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="px-3 py-1 bg-nordic-navy text-nordic-mint text-[0.6rem] font-black uppercase tracking-[2px] rounded-full flex items-center gap-2 shadow-lg shadow-nordic-navy/10 border border-white/10 animate-in fade-in slide-in-from-left-4 duration-1000">
+            <div className="w-1.5 h-1.5 bg-nordic-mint rounded-full animate-pulse"></div>
+            AI-Engine Active
+          </div>
+          <span className="text-[0.6rem] font-bold text-nordic-muted uppercase tracking-widest opacity-60">Professional Edition</span>
+        </div>
+        <h2 className="text-4xl md:text-6xl font-black text-nordic-navy tracking-tighter leading-none mb-4">
           {getGreeting()}, {user?.name ? user.name.split(' ')[0] : 'User'}.
         </h2>
-        <p className="text-nordic-muted text-lg md:text-xl font-medium mt-2">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+        <p className="text-nordic-muted/80 text-lg md:text-xl font-medium max-w-2xl">
+          Your intelligent workspace is optimized and ready for your next big breakthrough.
         </p>
       </section>
 
@@ -376,7 +383,10 @@ const Dashboard = () => {
 
         <aside className="space-y-6">
           <div className="bg-white rounded-px p-6 shadow-sm border border-nordic-border">
-            <h4 className="text-sm font-bold text-nordic-mint tracking-[1px] mb-6 uppercase">Suggested Actions</h4>
+            <h4 className="text-sm font-bold text-nordic-navy tracking-[1px] mb-6 uppercase flex items-center gap-2">
+              <div className="w-1 h-1 bg-nordic-mint rounded-full animate-pulse"></div>
+              AI Recommendations
+            </h4>
             <div className="space-y-4">
               {loadingSuggestions ? (
                 <p className="text-base text-nordic-muted italic">Analyzing patterns...</p>
@@ -404,8 +414,8 @@ const Dashboard = () => {
           
           <div className="bg-nordic-navy rounded-px p-6 text-white overflow-hidden relative group cursor-pointer transition-transform active:scale-95">
              <div className="absolute top-0 right-0 w-32 h-32 bg-nordic-mint/10 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-             <h4 className="text-xs font-bold text-nordic-mint tracking-wider mb-2">WEEKLY PULSE</h4>
-             <p className="text-xl font-bold leading-tight relative z-10">Task Progress</p>
+             <h4 className="text-xs font-bold text-nordic-mint tracking-wider mb-2">INTELLIGENCE SUMMARY</h4>
+             <p className="text-xl font-bold leading-tight relative z-10">Productivity Pulse</p>
              <div className="mt-6">
                <div className="flex justify-between items-end mb-1">
                  <span className="text-xs font-bold uppercase text-nordic-mint">Completion</span>

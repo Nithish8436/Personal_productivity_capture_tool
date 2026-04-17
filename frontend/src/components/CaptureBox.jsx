@@ -99,7 +99,7 @@ const CaptureBox = ({ onTaskCaptured }) => {
         </div>
         <input
           type="text"
-          placeholder={isListening ? "Listening..." : (window.innerWidth < 1024 ? "Capture thought..." : "Type anything... (e.g., Finalize report by tomorrow high priority)")}
+          placeholder={isListening ? "Listening to your instructions..." : (window.innerWidth < 1024 ? "Capture thought..." : "Speak or type your goal... (e.g., Finalize presentation by tomorrow evening, high priority)")}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
