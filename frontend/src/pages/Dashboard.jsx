@@ -157,6 +157,17 @@ const Dashboard = () => {
     }
   };
 
+  const handleToggleSms = async (id, newValue) => {
+    try {
+      const response = await axios.patch(`http://localhost:5000/api/tasks/${id}`, {
+        smsReminder: newValue
+      });
+      setTasks(tasks.map(t => t._id === id ? response.data : t));
+    } catch (error) {
+      console.error('Error updating SMS reminder:', error);
+    }
+  };
+
   const handleDeleteTask = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/tasks/${id}`);
@@ -206,6 +217,14 @@ const Dashboard = () => {
       return new Date(t.deadline).toDateString() === today;
     });
   }, [tasks]);
+
+  // Dynamic Greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   // Combined metrics for the overall dashboard summary
   const completedCount = tasks.filter(t => t.completed).length;
@@ -274,7 +293,7 @@ const Dashboard = () => {
 
       <section className="mb-6">
         <h2 className="text-4xl md:text-5xl font-black text-nordic-text tracking-tight">
-          Good morning, {user?.name ? user.name.split(' ')[0] : 'User'}.
+          {getGreeting()}, {user?.name ? user.name.split(' ')[0] : 'User'}.
         </h2>
         <p className="text-nordic-muted text-lg md:text-xl font-medium mt-2">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
@@ -335,6 +354,7 @@ const Dashboard = () => {
                     onToggleStatus={handleToggleStatus} 
                     onDecompose={handleDecompose}
                     onDelete={handleDeleteTask}
+                    onToggleSms={handleToggleSms}
                   />
                 ))}
                 {hasMoreTasks && (

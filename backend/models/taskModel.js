@@ -38,6 +38,18 @@ const taskSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  smsReminder: {
+    type: Boolean,
+    default: false
+  },
+  reminderSent: {
+    type: Boolean,
+    default: false
+  },
+  overdueReminderSent: {
+    type: Boolean,
+    default: false
+  },
   subtasks: [
     {
       title: String,

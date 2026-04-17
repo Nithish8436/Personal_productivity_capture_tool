@@ -39,9 +39,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register User
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, phone) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/users', { name, email, password });
+      const res = await axios.post('http://localhost:5000/api/users', { name, email, password, phone });
       localStorage.setItem('user', JSON.stringify(res.data));
       setUser(res.data);
       axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
@@ -60,8 +60,20 @@ export const AuthProvider = ({ children }) => {
     navigate('/login');
   };
 
+  // Update Profile
+  const updateProfile = async (profileData) => {
+    try {
+      const res = await axios.put('http://localhost:5000/api/users/profile', profileData);
+      localStorage.setItem('user', JSON.stringify(res.data));
+      setUser(res.data);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Update failed' };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

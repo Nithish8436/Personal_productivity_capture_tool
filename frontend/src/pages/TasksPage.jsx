@@ -57,6 +57,17 @@ const TasksPage = () => {
     }
   };
 
+  const handleToggleSms = async (id, newValue) => {
+    try {
+      const res = await axios.patch(`http://localhost:5000/api/tasks/${id}`, {
+        smsReminder: newValue
+      });
+      setTasks(tasks.map(t => t._id === id ? res.data : t));
+    } catch (err) {
+      console.error('SMS toggle error:', err);
+    }
+  };
+
   const filtered = tasks.filter(task => {
     const matchSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchCategory = filterCategory === 'All' || task.category === filterCategory;
@@ -171,6 +182,7 @@ const TasksPage = () => {
               onToggleStatus={handleToggle}
               onDecompose={handleDecompose}
               onDelete={handleDelete}
+              onToggleSms={handleToggleSms}
             />
           ))}
         </div>

@@ -1,12 +1,14 @@
-import React from 'react';
-import { Calendar, Tag, MoreVertical, CheckCircle, Circle, Layers, FileText, AlarmClock, ListChecks, Hash, Trash2, Edit3, Link2, History, Lightbulb } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, Tag, MoreVertical, CheckCircle, Circle, Layers, FileText, AlarmClock, ListChecks, Hash, Trash2, Edit3, Link2, History, Lightbulb, MessageSquareQuote, BellRing, Phone } from 'lucide-react';
 import axios from 'axios';
 
-const TaskCard = ({ task, onToggleStatus, onDecompose, onDelete }) => {
-  const [showMenu, setShowMenu] = React.useState(false);
-  const [showRelated, setShowRelated] = React.useState(false);
-  const [related, setRelated] = React.useState([]);
-  const [loadingRelated, setLoadingRelated] = React.useState(false);
+const TaskCard = ({ task, onToggleStatus, onDecompose, onDelete, onToggleSms }) => {
+  const [showMenu, setShowMenu] = useState(false);
+  const [showRelated, setShowRelated] = useState(false);
+  const [related, setRelated] = useState([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
+  const [isTogglingSms, setIsTogglingSms] = useState(false);
+
   const priorityStyles = {
     Low: 'bg-slate-100 text-slate-500',
     Medium: 'bg-nordic-mint/20 text-nordic-mint',
@@ -25,6 +27,18 @@ const TaskCard = ({ task, onToggleStatus, onDecompose, onDelete }) => {
     if (!dateStr) return null;
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+
+  const toggleSmsReminder = async (e) => {
+    e.stopPropagation();
+    setIsTogglingSms(true);
+    try {
+      await onToggleSms(task._id, !task.smsReminder);
+    } catch (err) {
+      console.error('Failed to toggle SMS reminder:', err);
+    } finally {
+      setIsTogglingSms(false);
+    }
   };
 
   const progress = task.subtasks && task.subtasks.length > 0 
@@ -68,7 +82,21 @@ const TaskCard = ({ task, onToggleStatus, onDecompose, onDelete }) => {
             )}
           </div>
           <div className="flex gap-2">
-            {/* Decompose moved to menu */}
+            {!isNote && !task.completed && task.deadline && (
+              <button
+                onClick={toggleSmsReminder}
+                disabled={isTogglingSms}
+                className={`p-2 rounded-lg transition-all flex items-center gap-1.5 border ${
+                  task.smsReminder 
+                    ? 'bg-nordic-mint/10 border-nordic-mint/30 text-nordic-teal' 
+                    : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-nordic-navy hover:border-nordic-border'
+                }`}
+                title={task.smsReminder ? 'SMS Reminder On' : 'Turn on SMS Reminder'}
+              >
+                <Phone size={14} className={task.smsReminder ? 'animate-pulse' : ''} />
+                <span className="text-[0.6rem] font-black uppercase tracking-widest hidden sm:inline">SMS</span>
+              </button>
+            )}
             <div className="relative">
               <MoreVertical 
                 size={18} 
@@ -77,7 +105,7 @@ const TaskCard = ({ task, onToggleStatus, onDecompose, onDelete }) => {
               />
               {showMenu && (
                 <div 
-                  className="absolute right-0 mt-2 w-48 bg-white border border-nordic-border rounded-xl shadow-xl z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 mt-2 w-48 bg-white border border-nordic-border rounded-xl shadow-xl z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-nordic-text hover:bg-slate-50 transition-colors text-left font-medium">
@@ -133,7 +161,7 @@ const TaskCard = ({ task, onToggleStatus, onDecompose, onDelete }) => {
 
         {/* Global click listener to close menu */}
         {showMenu && (
-          <div className="fixed inset-0 z-0" onClick={() => setShowMenu(false)}></div>
+          <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>
         )}
 
         <div className="flex items-center gap-4 flex-wrap mt-3">

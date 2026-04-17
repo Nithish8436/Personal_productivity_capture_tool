@@ -47,7 +47,17 @@ const parseUserInput = async (text) => {
           - Tags: Extract 1-3 semantic keywords for easy retrieval later.
           - If no priority is implied, default to 'Medium'.
           - If no category is implied, default to 'Other'.
-          - Respond ONLY with the JSON object. No preamble or markdown blocks.`,
+          
+          TIME RESOLUTION:
+          If the user uses broad time terms, resolve them to these specific times:
+          - "Morning" = 09:00:00
+          - "Noon" = 12:00:00
+          - "Afternoon" = 14:00:00
+          - "Evening" = 18:00:00
+          - "Night" = 21:00:00
+          - Example: "Tomorrow evening" -> 2026-04-16T18:00:00
+          
+          Respond ONLY with the JSON object. No preamble or markdown blocks.`,
         },
         {
           role: 'user',

@@ -1,11 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowRight, Lock, Mail, User as UserIcon, CheckCircle2, CloudLightning, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Lock, Mail, User as UserIcon, CheckCircle2, CloudLightning, ShieldCheck, Phone as PhoneIcon } from 'lucide-react';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ const Register = () => {
     setError('');
     setLoading(true);
     
-    const result = await register(name, email, password);
+    const result = await register(name, email, password, phone);
     if (!result.success) {
       setError(result.message);
     }
@@ -139,7 +140,31 @@ const Register = () => {
                   />
                 </div>
               </div>
-              
+
+              {/* Phone Input */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-nordic-navy uppercase tracking-wider ml-1 relative z-10 transition-colors"
+                  style={{ color: focusedInput === 'phone' ? 'var(--color-nordic-teal)' : 'var(--color-nordic-navy)' }}
+                >
+                  Phone Number
+                </label>
+                <div className={`relative transition-all duration-300 rounded-xl overflow-hidden ${focusedInput === 'phone' ? 'ring-4 ring-nordic-mint/20 shadow-lg' : 'shadow-sm'}`}>
+                  <div className={`absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors ${focusedInput === 'phone' ? 'text-nordic-teal' : 'text-slate-400'}`}>
+                    <PhoneIcon size={18} />
+                  </div>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    onFocus={() => setFocusedInput('phone')}
+                    onBlur={() => setFocusedInput(null)}
+                    placeholder="+1234567890"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none transition-all text-sm font-semibold text-nordic-navy placeholder:text-slate-400 placeholder:font-medium focus:bg-white"
+                  />
+                </div>
+              </div>
+
               {/* Password Input */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-nordic-navy uppercase tracking-wider ml-1 relative z-10 transition-colors"
