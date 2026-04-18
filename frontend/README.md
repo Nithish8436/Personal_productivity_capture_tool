@@ -1,16 +1,36 @@
-# React + Vite
+# Curator - Frontend Architecture
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend of **Curator** is a modern, high-performance single-page application (SPA) built with **React** and **Vite**. It focuses on a premium "Nordic" aesthetic—clean lines, glassmorphism, and smooth micro-animations.
 
-Currently, two official plugins are available:
+## 🛠 Core Technologies
+- **React 18**: Component-based UI library.
+- **Vite**: Ultra-fast build tool and dev server.
+- **Tailwind CSS**: Utility-first CSS framework for custom, premium styling.
+- **Lucide React**: Beautiful, consistent iconography.
+- **Axios**: Promised-based HTTP client for API communication.
+- **React Router Dom**: Declarative routing for the Dashboard, Analytics, and Profile pages.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🎨 Design System (The "Nordic" Aesthetic)
+The application uses a custom-curated color palette defined in `tailwind.config.js`:
+- **Nordic Navy (`#0f172a`)**: Deep, professional base color.
+- **Nordic Mint (`#00f5d4`)**: Vibrant accent for progress and primary actions.
+- **Nordic Teal (`#00bfa5`)**: Stability and secondary focus.
+- **Glassmorphism**: Extensive use of `backdrop-blur` and translucent white overlays (`bg-white/80`) to provide a layered, modern depth.
 
-## React Compiler
+## 📦 Key Component Highlights
+- **CaptureBox**: Features integrated **Web Speech API** for voice-to-task recognition.
+- **TaskCard**: A high-density information display component with built-in state management for SMS toggling and task decomposition.
+- **Calendar**: A custom-built date selection component integrated with task filtering.
+- **AuthContext**: A global state provider using React Context API to manage user sessions and JWT persistence.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Development
+```bash
+# Install dependencies
+npm install
 
-## Expanding the ESLint configuration
+# Run development server
+npm run dev
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Build for production
+npm run build
+```

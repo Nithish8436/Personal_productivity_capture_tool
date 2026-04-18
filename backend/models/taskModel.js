@@ -1,9 +1,17 @@
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  },
   title: {
     type: String,
     required: [true, 'Task title is required']
+  },
+  description: {
+    type: String
   },
   deadline: {
     type: Date
@@ -17,10 +25,37 @@ const taskSchema = new mongoose.Schema({
     enum: ['Low', 'Medium', 'High', 'Critical'],
     default: 'Medium'
   },
+  itemType: {
+    type: String,
+    enum: ['Task', 'Note', 'Reminder', 'To-do'],
+    default: 'Task'
+  },
+  tags: {
+    type: [String],
+    default: []
+  },
   completed: {
     type: Boolean,
     default: false
   },
+  smsReminder: {
+    type: Boolean,
+    default: false
+  },
+  reminderSent: {
+    type: Boolean,
+    default: false
+  },
+  overdueReminderSent: {
+    type: Boolean,
+    default: false
+  },
+  subtasks: [
+    {
+      title: String,
+      completed: { type: Boolean, default: false }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now
